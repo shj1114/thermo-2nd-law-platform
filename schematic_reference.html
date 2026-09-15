@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>电流表原理图 - 参考设计</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    background: #1a1a2e; 
+    padding: 20px;
+    color: #333;
+  }
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 30px;
+  }
+  .header h1 { font-size: 24px; margin-bottom: 5px; }
+  .header p { opacity: 0.9; font-size: 14px; }
+  .content {
+    padding: 30px;
+    overflow-x: auto;
+  }
+  svg {
+    display: block;
+    margin: 0 auto;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+  }
+  .module-box {
+    fill: none;
+    stroke: #667eea;
+    stroke-width: 2;
+    stroke-dasharray: 5,3;
+  }
+  .module-label {
+    fill: #667eea;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .wire {
+    stroke: #333;
+    stroke-width: 1.5;
+    fill: none;
+  }
+  .wire-power {
+    stroke: #e74c3c;
+    stroke-width: 2;
+    fill: none;
+  }
+  .wire-gnd {
+    stroke: #27ae60;
+    stroke-width: 2;
+    fill: none;
+  }
+  .wire-signal {
+    stroke: #3498db;
+    stroke-width: 1.5;
+    fill: none;
+  }
+  .wire-spi {
+    stroke: #e67e22;
+    stroke-width: 1.5;
+    fill: none;
+  }
+  .component {
+    fill: #fff;
+    stroke: #2c3e50;
+    stroke-width: 2;
+  }
+  .component-text {
+    fill: #2c3e50;
+    font-size: 11px;
+    font-weight: bold;
+  }
+  .pin-label {
+    fill: #555;
+    font-size: 10px;
+  }
+  .value-text {
+    fill: #e74c3c;
+    font-size: 10px;
+  }
+  .net-label {
+    fill: #3498db;
+    font-size: 10px;
+    font-weight: bold;
+  }
+  .dot {
+    fill: #333;
+  }
+  .junction {
+    fill: #333;
+  }
+  .footer {
+    text-align: center;
+    padding: 15px;
+    background: #f8f9fa;
+    color: #666;
+    font-size: 12px;
+    border-top: 1px solid #eee;
+  }
+  .legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    padding: 10px;
+    background: #f8f9fa;
+    font-size: 11px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .legend-line {
+    width: 30px;
+    height: 3px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>📟 自制电流表原理图 - 参考设计</h1>
+    <p>MCU: MSPM0G3507 | 电流范围: 0.1~2A | 精度: ≤0.5% | 无线: nRF24L01+</p>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-line" style="background:#e74c3c"></div>电源线 (3.3V)</div>
+    <div class="legend-item"><div class="legend-line" style="background:#27ae60"></div>地线 (GND)</div>
+    <div class="legend-item"><div class="legend-line" style="background:#3498db"></div>信号线</div>
+    <div class="legend-item"><div class="legend-line" style="background:#e67e22"></div>SPI总线</div>
+  </div>
+  <div class="content">
+    <svg viewBox="0 0 1200 900" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:1100px;">
+      
+      <!-- 背景网格 -->
+      <defs>
+        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e8e8e8" stroke-width="0.5"/>
+        </pattern>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#333"/>
+        </marker>
+      </defs>
+      <rect width="1200" height="900" fill="url(#grid)"/>
+
+      <!-- ========== 模块1: 电源部分 ========== -->
+      <rect x="20" y="20" width="280" height="200" class="module-box" rx="5"/>
+      <text x="160" y="40" text-anchor="middle" class="module-label">电源模块 (Power Supply)</text>
+      
+      <!-- 整流桥 -->
+      <rect x="50" y="60" width="60" height="50" class="component" rx="3"/>
+      <text x="80" y="80" text-anchor="middle" class="component-text">DB1</text>
+      <text x="80" y="95" text-anchor="middle" class="value-text">1N4007×4</text>
+      <!-- 整流桥引脚 -->
+      <circle cx="50" cy="75" r="3" class="dot"/>
+      <circle cx="50" cy="105" r="3" class="dot"/>
+      <circle cx="110" cy="75" r="3" class="dot"/>
+      <circle cx="110" cy="105" r="3" class="dot"/>
+      
+      <!-- 输入标签 -->
+      <text x="35" y="65" class="pin-label">AC1</text>
+      <text x="35" y="115" class="pin-label">AC2</text>
+      <!-- 输出标签 -->
+      <text x="115" y="68" class="net-label">+5V</text>
+      <text x="115" y="118" class="net-label">GND</text>
+      
+      <!-- 滤波电容 -->
+      <rect x="130" y="75" width="25" height="35" class="component" rx="2"/>
+      <text x="142" y="97" text-anchor="middle" class="component-text">C1</text>
+      <text x="142" y="108" text-anchor="middle" class="value-text">100μF</text>
+      
+      <!-- 电感/储能 -->
+      <circle cx="200" cy="80" r="8" class="component"/>
+      <circle cx="220" cy="80" r="8" class="component"/>
+      <circle cx="240" cy="80" r="8" class="component"/>
+      <text x="220" y="115" text-anchor="middle" class="component-text">L1</text>
+      <text x="220" y="128" text-anchor="middle" class="value-text">10μH</text>
+      
+      <!-- MT3608 DC-DC -->
+      <rect x="180" y="140" width="80" height="50" class="component" rx="3"/>
+      <text x="220" y="160" text-anchor="middle" class="component-text">U1</text>
+      <text x="220" y="175" text-anchor="middle" class="value-text">MT3608</text>
+      <text x="220" y="190" text-anchor="middle" class="pin-label">DC-DC Boost</text>
+      <!-- MT3608引脚 -->
+      <circle cx="180" cy="150" r="2" class="dot"/>
+      <circle cx="180" cy="165" r="2" class="dot"/>
+      <circle cx="180" cy="180" r="2" class="dot"/>
+      <circle cx="260" cy="150" r="2" class="dot"/>
+      <circle cx="260" cy="165" r="2" class="dot"/>
+      <circle cx="260" cy="180" r="2" class="dot"/>
+      
+      <!-- 电源连线 -->
+      <line x1="110" y1="75" x2="130" y2="75" class="wire-power"/>
+      <line x1="155" y1="75" x2="200" y2="75" class="wire-power"/>
+      <line x1="255" y1="80" x2="260" y2="150" class="wire-power"/>
+      <line x1="220" y1="190" x2="220" y2="230" class="wire-power"/>
+      <text x="230" y="220" class="net-label">+3.3V System</text>
+      
+      <!-- 地线 -->
+      <line x1="110" y1="105" x2="110" y2="200" class="wire-gnd"/>
+      <line x1="110" y1="200" x2="30" y2="200" class="wire-gnd"/>
+      <!-- 地线符号 -->
+      <line x1="25" y1="195" x2="35" y2="195" stroke="#27ae60" stroke-width="2"/>
+      <line x1="22" y1="200" x2="38" y2="200" stroke="#27ae60" stroke-width="2"/>
+      <line x1="20" y1="205" x2="40" y2="205" stroke="#27ae60" stroke-width="2"/>
+      
+      <!-- ========== 模块2: 电流测量 ========== -->
+      <rect x="20" y="240" width="280" height="200" class="module-box" rx="5"/>
+      <text x="160" y="260" text-anchor="middle" class="module-label">电流测量模块 (Current Sensing)</text>
+      
+      <!-- 采样电阻 -->
+      <rect x="40" y="290" width="40" height="60" class="component" rx="3"/>
+      <line x1="40" y1="305" x2="80" y2="305" class="wire"/>
+      <line x1="40" y1="315" x2="80" y2="315" class="wire"/>
+      <line x1="40" y1="325" x2="80" y2="325" class="wire"/>
+      <line x1="40" y1="335" x2="80" y2="335" class="wire"/>
+      <text x="60" y="370" text-anchor="middle" class="component-text">Rsense</text>
+      <text x="60" y="383" text-anchor="middle" class="value-text">1Ω / 1%</text>
+      <circle cx="40" cy="305" r="3" class="dot"/>
+      <circle cx="40" cy="335" r="3" class="dot"/>
+      <circle cx="80" cy="305" r="3" class="dot"/>
+      <circle cx="80" cy="335" r="3" class="dot"/>
+      
+      <!-- 运放 LM358 -->
+      <rect x="130" y="290" width="90" height="80" class="component" rx="3"/>
+      <text x="175" y="310" text-anchor="middle" class="component-text">U2</text>
+      <text x="175" y="325" text-anchor="middle" class="value-text">LM358</text>
+      <line x1="140" y1="345" x2="210" y2="345" class="wire"/>
+      <text x="135" y="350" class="pin-label">+</text>
+      <text x="135" y="365" class="pin-label">-</text>
+      <text x="215" y="358" class="pin-label">Out</text>
+      <!-- 运放引脚 -->
+      <circle cx="130" cy="345" r="2" class="dot"/>
+      <circle cx="130" cy="360" r="2" class="dot"/>
+      <circle cx="220" cy="352" r="2" class="dot"/>
+      <circle cx="175" cy="290" r="2" class="dot"/>
+      <circle cx="175" cy="370" r="2" class="dot"/>
+      
+      <!-- 反馈电阻 -->
+      <rect x="155" y="380" width="20" height="30" class="component" rx="2"/>
+      <text x="165" y="400" text-anchor="middle" class="value-text">Rf1</text>
+      <text x="165" y="412" text-anchor="middle" class="value-text">100kΩ</text>
+      
+      <rect x="200" y="380" width="20" height="30" class="component" rx="2"/>
+      <text x="210" y="400" text-anchor="middle" class="value-text">Rf2</text>
+      <text x="210" y="412" text-anchor="middle" class="value-text">100kΩ</text>
+      
+      <!-- 连线 -->
+      <line x1="80" y1="305" x2="130" y2="345" class="wire-signal"/>
+      <line x1="80" y1="335" x2="80" y2="430" class="wire-gnd"/>
+      <line x1="80" y1="430" x2="30" y2="430" class="wire-gnd"/>
+      
+      <!-- 输出到ADC -->
+      <line x1="220" y1="352" x2="280" y2="352" class="wire-signal"/>
+      <text x="235" y="345" class="net-label">AIN0</text>
+      
+      <!-- 滤波电容 -->
+      <rect x="250" y="380" width="20" height="25" class="component" rx="2"/>
+      <text x="260" y="395" text-anchor="middle" class="value-text">C2</text>
+      <text x="260" y="405" text-anchor="middle" class="value-text">0.1μF</text>
+      <line x1="260" y1="352" x2="260" y2="380" class="wire-signal"/>
+      <line x1="260" y1="405" x2="260" y2="430" class="wire-gnd"/>
+      
+      <!-- ========== 模块3: MCU主控 ========== -->
+      <rect x="340" y="20" width="360" height="480" class="module-box" rx="5"/>
+      <text x="520" y="40" text-anchor="middle" class="module-label">主控模块 (MSPM0G3507 MCU)</text>
+      
+      <!-- MSPM0G3507 芯片 -->
+      <rect x="420" y="100" width="200" height="300" class="component" rx="5"/>
+      <rect x="420" y="100" width="200" height="30" fill="#667eea" rx="5"/>
+      <text x="520" y="122" text-anchor="middle" fill="white" font-size="13" font-weight="bold">TI MSPM0G3507</text>
+      <text x="520" y="145" text-anchor="middle" class="value-text">VQFN-32</text>
+      
+      <!-- 左侧引脚 (Pin 1-16) -->
+      <circle cx="420" cy="160" r="3" class="dot"/>
+      <text x="415" y="165" text-anchor="end" class="pin-label">1 VDDA</text>
+      
+      <circle cx="420" cy="180" r="3" class="dot"/>
+      <text x="415" y="185" text-anchor="end" class="pin-label">2 PA0/AIN0</text>
+      
+      <circle cx="420" cy="200" r="3" class="dot"/>
+      <text x="415" y="205" text-anchor="end" class="pin-label">3 PA1/AIN1</text>
+      
+      <circle cx="420" cy="220" r="3" class="dot"/>
+      <text x="415" y="225" text-anchor="end" class="pin-label">4 PA2/DAC</text>
+      
+      <circle cx="420" cy="240" r="3" class="dot"/>
+      <text x="415" y="245" text-anchor="end" class="pin-label">5 PA3</text>
+      
+      <circle cx="420" cy="260" r="3" class="dot"/>
+      <text x="415" y="265" text-anchor="end" class="pin-label">6 PA4</text>
+      
+      <circle cx="420" cy="280" r="3" class="dot"/>
+      <text x="415" y="285" text-anchor="end" class="pin-label">7 PA5/SCK</text>
+      
+      <circle cx="420" cy="300" r="3" class="dot"/>
+      <text x="415" y="305" text-anchor="end" class="pin-label">8 PA6/MISO</text>
+      
+      <circle cx="420" cy="320" r="3" class="dot"/>
+      <text x="415" y="325" text-anchor="end" class="pin-label">9 PA7/MOSI</text>
+      
+      <circle cx="420" cy="340" r="3" class="dot"/>
+      <text x="415" y="345" text-anchor="end" class="pin-label">10 PB0/CS</text>
+      
+      <circle cx="420" cy="360" r="3" class="dot"/>
+      <text x="415" y="365" text-anchor="end" class="pin-label">11 PB1/CE</text>
+      
+      <circle cx="420" cy="380" r="3" class="dot"/>
+      <text x="415" y="385" text-anchor="end" class="pin-label">12 PB2</text>
+      
+      <circle cx="420" cy="400" r="3" class="dot"/>
+      <text x="415" y="405" text-anchor="end" class="pin-label">13 PB3</text>
+      
+      <circle cx="420" cy="420" r="3" class="dot"/>
+      <text x="415" y="425" text-anchor="end" class="pin-label">14 PF0</text>
+      
+      <circle cx="420" cy="440" r="3" class="dot"/>
+      <text x="415" y="445" text-anchor="end" class="pin-label">15 PF1</text>
+      
+      <circle cx="420" cy="460" r="3" class="dot"/>
+      <text x="415" y="465" text-anchor="end" class="pin-label">16 PF2</text>
+      
+      <!-- 右侧引脚 (Pin 17-32) -->
+      <circle cx="640" cy="160" r="3" class="dot"/>
+      <text x="645" y="165" class="pin-label">17 PF3</text>
+      
+      <circle cx="640" cy="180" r="3" class="dot"/>
+      <text x="645" y="185" class="pin-label">18 VSSA</text>
+      
+      <circle cx="640" cy="200" r="3" class="dot"/>
+      <text x="645" y="205" class="pin-label">19 VSS</text>
+      
+      <circle cx="640" cy="220" r="3" class="dot"/>
+      <text x="645" y="225" class="pin-label">20 VDD</text>
+      
+      <circle cx="640" cy="240" r="3" class="dot"/>
+      <text x="645" y="245" class="pin-label">21 NRST</text>
+      
+      <circle cx="640" cy="260" r="3" class="dot"/>
+      <text x="645" y="265" class="pin-label">22 SWDIO</text>
+      
+      <circle cx="640" cy="280" r="3" class="dot"/>
+      <text x="645" y="285" class="pin-label">23 SWCLK</text>
+      
+      <circle cx="640" cy="300" r="3" class="dot"/>
+      <text x="645" y="305" class="pin-label">24 UCA0TXD</text>
+      
+      <circle cx="640" cy="320" r="3" class="dot"/>
+      <text x="645" y="325" class="pin-label">25 UCA0RXD</text>
+      
+      <circle cx="640" cy="340" r="3" class="dot"/>
+      <text x="645" y="345" class="pin-label">26 UCXCLK</text>
+      
+      <circle cx="640" cy="360" r="3" class="dot"/>
+      <text x="645" y="365" class="pin-label">27 UCXSTE</text>
+      
+      <circle cx="640" cy="380" r="3" class="dot"/>
+      <text x="645" y="385" class="pin-label">28 UCXSIMO</text>
+      
+      <circle cx="640" cy="400" r="3" class="dot"/>
+      <text x="645" y="405" class="pin-label">29 UCXSOMI</text>
+      
+      <circle cx="640" cy="420" r="3" class="dot"/>
+      <text x="645" y="425" class="pin-label">30 TA0.1</text>
+      
+      <circle cx="640" cy="440" r="3" class="dot"/>
+      <text x="645" y="445" class="pin-label">31 TA0.2</text>
+      
+      <circle cx="640" cy="460" r="3" class="dot"/>
+      <text x="645" y="465" class="pin-label">32 VDD</text>
+      
+      <!-- MCU去耦电容 -->
+      <rect x="370" y="155" width="20" height="20" class="component" rx="2"/>
+      <text x="380" y="168" text-anchor="middle" class="value-text">C3</text>
+      <text x="380" y="178" text-anchor="middle" class="value-text">0.1μF</text>
+      <line x1="420" y1="160" x2="390" y2="160" class="wire-power"/>
+      
+      <rect x="690" y="215" width="20" height="20" class="component" rx="2"/>
+      <text x="700" y="228" text-anchor="middle" class="value-text">C4</text>
+      <text x="700" y="238" text-anchor="middle" class="value-text">1μF</text>
+      <line x1="640" y1="220" x2="690" y2="220" class="wire-power"/>
+      
+      <!-- VDD连接 -->
+      <line x1="640" y1="220" x2="800" y2="220" class="wire-power"/>
+      <line x1="800" y1="220" x2="800" y2="200" class="wire-power"/>
+      <line x1="800" y1="200" x2="700" y2="200" class="wire-power"/>
+      <text x="770" y="195" class="net-label">+3.3V</text>
+      
+      <!-- VSS连接 -->
+      <line x1="640" y1="200" x2="850" y2="200" class="wire-gnd"/>
+      <text x="800" y="195" class="net-label">GND</text>
+      
+      <!-- ========== 模块4: SPI无线接口 ========== -->
+      <rect x="740" y="20" width="200" height="220" class="module-box" rx="5"/>
+      <text x="840" y="40" text-anchor="middle" class="module-label">无线模块接口 (nRF24L01+)</text>
+      
+      <!-- 8Pin排母 -->
+      <rect x="770" y="60" width="140" height="180" class="component" rx="3"/>
+      <text x="840" y="78" text-anchor="middle" class="component-text">J1</text>
+      <text x="840" y="92" text-anchor="middle" class="value-text">HDR-F 2.54mm 8Pin</text>
+      
+      <!-- 排母引脚 -->
+      <circle cx="770" cy="110" r="3" class="dot"/>
+      <text x="775" y="114" class="pin-label">1 VCC</text>
+      <line x1="770" y1="110" x2="740" y2="110" class="wire-power"/>
+      <line x1="740" y1="110" x2="740" y2="220" class="wire-power"/>
+      <line x1="740" y1="220" x2="700" y2="220" class="wire-power"/>
+      
+      <circle cx="770" cy="130" r="3" class="dot"/>
+      <text x="775" y="134" class="pin-label">2 GND</text>
+      <line x1="770" y1="130" x2="850" y2="130" class="wire-gnd"/>
+      
+      <circle cx="770" cy="150" r="3" class="dot"/>
+      <text x="775" y="154" class="pin-label">3 SCK</text>
+      <line x1="770" y1="150" x2="700" y2="150" class="wire-spi"/>
+      <line x1="700" y1="150" x2="640" y2="280" class="wire-spi"/>
+      
+      <circle cx="770" cy="170" r="3" class="dot"/>
+      <text x="775" y="174" class="pin-label">4 MISO</text>
+      <line x1="770" y1="170" x2="700" y2="170" class="wire-spi"/>
+      <line x1="700" y1="170" x2="640" y2="300" class="wire-spi"/>
+      
+      <circle cx="770" cy="190" r="3" class="dot"/>
+      <text x="775" y="194" class="pin-label">5 MOSI</text>
+      <line x1="770" y1="190" x2="700" y2="190" class="wire-spi"/>
+      <line x1="700" y1="190" x2="640" y2="320" class="wire-spi"/>
+      
+      <circle cx="770" cy="210" r="3" class="dot"/>
+      <text x="775" y="214" class="pin-label">6 CSN</text>
+      <line x1="770" y1="210" x2="700" y2="210" class="wire-spi"/>
+      <line x1="700" y1="210" x2="640" y2="340" class="wire-spi"/>
+      
+      <circle cx="770" cy="230" r="3" class="dot"/>
+      <text x="775" y="234" class="pin-label">7 CE</text>
+      <line x1="770" y1="230" x2="700" y2="230" class="wire-spi"/>
+      <line x1="700" y1="230" x2="640" y2="360" class="wire-spi"/>
+      
+      <circle cx="770" cy="250" r="3" class="dot"/>
+      <text x="775" y="254" class="pin-label">8 DET</text>
+      <line x1="770" y1="250" x2="700" y2="250" class="wire-signal"/>
+      <line x1="700" y1="250" x2="640" y2="380" class="wire-signal"/>
+      
+      <!-- SPI标签 -->
+      <text x="680" y="270" class="net-label">SPI Bus</text>
+      
+      <!-- ========== 模块5: 显示与按键 ========== -->
+      <rect x="740" y="260" width="200" height="240" class="module-box" rx="5"/>
+      <text x="840" y="280" text-anchor="middle" class="module-label">显示与按键模块</text>
+      
+      <!-- TM1637驱动 -->
+      <rect x="760" y="300" width="90" height="50" class="component" rx="3"/>
+      <text x="805" y="320" text-anchor="middle" class="component-text">U3</text>
+      <text x="805" y="335" text-anchor="middle" class="value-text">TM1637</text>
+      <!-- TM1637引脚 -->
+      <circle cx="760" cy="310" r="2" class="dot"/>
+      <text x="735" y="308" class="pin-label">CLK</text>
+      <line x1="760" y1="310" x2="700" y2="310" class="wire-signal"/>
+      <line x1="700" y1="310" x2="640" y2="300" class="wire-signal"/>
+      
+      <circle cx="760" cy="325" r="2" class="dot"/>
+      <text x="735" y="330" class="pin-label">DIO</text>
+      <line x1="760" y1="325" x2="700" y2="325" class="wire-signal"/>
+      <line x1="700" y1="325" x2="640" y2="280" class="wire-signal"/>
+      
+      <circle cx="760" cy="340" r="2" class="dot"/>
+      <text x="735" y="345" class="pin-label">VCC</text>
+      
+      <circle cx="850" cy="310" r="2" class="dot"/>
+      <circle cx="850" cy="325" r="2" class="dot"/>
+      <circle cx="850" cy="340" r="2" class="dot"/>
+      
+      <!-- 数码管 -->
+      <rect x="870" y="300" width="60" height="50" class="component" rx="3"/>
+      <text x="900" y="325" text-anchor="middle" class="component-text">DS1</text>
+      <text x="900" y="340" text-anchor="middle" class="value-text">0.56"</text>
+      <text x="900" y="352" text-anchor="middle" class="value-text">4-digit</text>
+      
+      <!-- 按键 -->
+      <rect x="760" y="380" width="30" height="20" class="component" rx="2"/>
+      <line x1="760" y1="380" x2="775" y2="370" class="wire"/>
+      <line x1="790" y1="380" x2="775" y2="370" class="wire"/>
+      <text x="775" y="415" text-anchor="middle" class="component-text">SW1</text>
+      <text x="775" y="425" text-anchor="middle" class="value-text">按键</text>
+      <circle cx="760" cy="390" r="2" class="dot"/>
+      <circle cx="790" cy="390" r="2" class="dot"/>
+      <line x1="760" y1="390" x2="700" y2="390" class="wire-signal"/>
+      <line x1="700" y1="390" x2="640" y2="400" class="wire-signal"/>
+      
+      <!-- LED -->
+      <circle cx="840" cy="390" r="8" class="component"/>
+      <text x="840" y="395" text-anchor="middle" class="component-text">LED1</text>
+      <line x1="832" y1="385" x2="815" y2="385" class="wire-power"/>
+      <line x1="848" y1="385" x2="855" y2="375" class="wire"/>
+      <rect x="815" y="380" width="10" height="10" class="component" rx="2"/>
+      <text x="820" y="389" text-anchor="middle" class="value-text">R1</text>
+      <text x="820" y="400" text-anchor="middle" class="value-text">1kΩ</text>
+      
+      <circle cx="840" cy="430" r="8" class="component"/>
+      <text x="840" y="435" text-anchor="middle" class="component-text">LED2</text>
+      <line x1="832" y1="425" x2="815" y2="425" class="wire-signal"/>
+      <line x1="848" y1="425" x2="855" y2="415" class="wire"/>
+      <rect x="815" y="420" width="10" height="10" class="component" rx="2"/>
+      <text x="820" y="429" text-anchor="middle" class="value-text">R2</text>
+      <text x="820" y="440" text-anchor="middle" class="value-text">1kΩ</text>
+      <line x1="815" y1="425" x2="700" y2="425" class="wire-signal"/>
+      <line x1="700" y1="425" x2="640" y2="420" class="wire-signal"/>
+      
+      <!-- 拨码开关 -->
+      <rect x="760" y="450" width="100" height="40" class="component" rx="3"/>
+      <text x="810" y="468" text-anchor="middle" class="component-text">SW2</text>
+      <text x="810" y="483" text-anchor="middle" class="value-text">4位拨码开关</text>
+      <circle cx="770" cy="460" r="2" class="dot"/>
+      <circle cx="790" cy="460" r="2" class="dot"/>
+      <circle cx="810" cy="460" r="2" class="dot"/>
+      <circle cx="830" cy="460" r="2" class="dot"/>
+      <circle cx="850" cy="460" r="2" class="dot"/>
+      <line x1="770" y1="460" x2="700" y2="460" class="wire-signal"/>
+      <line x1="700" y1="460" x2="640" y2="440" class="wire-signal"/>
+      
+      <!-- ========== 模块6: 接口与放电 ========== -->
+      <rect x="20" y="480" width="280" height="180" class="module-box" rx="5"/>
+      <text x="160" y="500" text-anchor="middle" class="module-label">接口与放电模块</text>
+      
+      <!-- 香蕉插座 -->
+      <circle cx="60" cy="530" r="12" class="component"/>
+      <text x="60" y="535" text-anchor="middle" class="component-text">J2</text>
+      <text x="60" y="525" text-anchor="middle" class="value-text">IN+</text>
+      <circle cx="60" cy="530" r="4" fill="#e74c3c"/>
+      
+      <circle cx="100" cy="530" r="12" class="component"/>
+      <text x="100" y="535" text-anchor="middle" class="component-text">J3</text>
+      <text x="100" y="525" text-anchor="middle" class="value-text">IN-</text>
+      <circle cx="100" cy="530" r="4" fill="#2c3e50"/>
+      
+      <circle cx="160" cy="530" r="12" class="component"/>
+      <text x="160" y="535" text-anchor="middle" class="component-text">J4</text>
+      <text x="160" y="525" text-anchor="middle" class="value-text">OUT+</text>
+      <circle cx="160" cy="530" r="4" fill="#e74c3c"/>
+      
+      <circle cx="200" cy="530" r="12" class="component"/>
+      <text x="200" y="535" text-anchor="middle" class="component-text">J5</text>
+      <text x="200" y="525" text-anchor="middle" class="value-text">OUT-</text>
+      <circle cx="200" cy="530" r="4" fill="#2c3e50"/>
+      
+      <text x="60" y="560" text-anchor="middle" class="pin-label">输入端口</text>
+      <text x="160" y="560" text-anchor="middle" class="pin-label">输出端口</text>
+      
+      <!-- 放电回路 -->
+      <rect x="40" y="590" width="60" height="25" class="component" rx="2"/>
+      <text x="70" y="608" text-anchor="middle" class="component-text">R_disc</text>
+      <text x="70" y="620" text-anchor="middle" class="value-text">100Ω / 1W</text>
+      
+      <rect x="130" y="590" width="30" height="25" class="component" rx="2"/>
+      <text x="145" y="605" text-anchor="middle" class="component-text">SW_d</text>
+      <text x="145" y="618" text-anchor="middle" class="value-text">放电键</text>
+      
+      <line x1="100" y1="600" x2="130" y2="600" class="wire-power"/>
+      <line x1="70" y1="590" x2="70" y2="460" class="wire-power"/>
+      <text x="50" y="590" class="net-label">3.3V</text>
+      <line x1="160" y1="600" x2="250" y2="600" class="wire-gnd"/>
+      <text x="220" y="615" class="net-label">GND</text>
+      
+      <!-- 放电回路标签 -->
+      <text x="140" y="640" text-anchor="middle" class="pin-label">放电回路 (外露按钮)</text>
+      
+      <!-- ========== 模块7: 保险丝 ========== -->
+      <rect x="310" y="500" width="80" height="60" class="module-box" rx="5"/>
+      <text x="350" y="520" text-anchor="middle" class="module-label">保护电路</text>
+      
+      <!-- 保险丝 -->
+      <rect x="325" y="530" width="50" height="25" class="component" rx="2"/>
+      <text x="350" y="547" text-anchor="middle" class="component-text">F1</text>
+      <text x="350" y="558" text-anchor="middle" class="value-text">5A</text>
+      <circle cx="325" cy="542" r="2" class="dot"/>
+      <circle cx="375" cy="542" r="2" class="dot"/>
+      
+      <!-- 标签说明 -->
+      <text x="350" y="580" text-anchor="middle" class="pin-label">保险丝 (保护)</text>
+      
+      <!-- ========== 连接到主控的连线 ========== -->
+      <!-- AIN0连线 -->
+      <line x1="280" y1="352" x2="350" y2="352" class="wire-signal"/>
+      <line x1="350" y1="352" x2="350" y2="180" class="wire-signal"/>
+      <line x1="350" y1="180" x2="420" y2="180" class="wire-signal"/>
+      <circle cx="350" cy="352" r="3" class="junction"/>
+      <circle cx="350" cy="180" r="3" class="junction"/>
+      <text x="360" y="345" class="net-label">PA0/AIN0</text>
+      
+      <!-- PA5/SCK连线 (从SPI接口) -->
+      <!-- 已在SPI模块中绘制 -->
+      
+      <!-- 地线连接汇总 -->
+      <line x1="110" y1="430" x2="110" y2="700" class="wire-gnd"/>
+      <line x1="110" y1="700" x2="450" y2="700" class="wire-gnd"/>
+      <line x1="450" y1="700" x2="450" y2="200" class="wire-gnd"/>
+      <line x1="450" y1="200" x2="640" y2="200" class="wire-gnd"/>
+      <text x="300" y="695" class="net-label">GND 地线总线</text>
+      
+      <!-- 3.3V电源线汇总 -->
+      <line x1="220" y1="230" x2="220" y2="750" class="wire-power"/>
+      <line x1="220" y1="750" x2="400" y2="750" class="wire-power"/>
+      <line x1="400" y1="750" x2="400" y2="220" class="wire-power"/>
+      <line x1="400" y1="220" x2="640" y2="220" class="wire-power"/>
+      <text x="280" y="745" class="net-label">+3.3V 电源总线</text>
+      
+      <!-- ========== 元件清单表 ========== -->
+      <rect x="960" y="20" width="220" height="660" class="module-box" rx="5"/>
+      <text x="1070" y="40" text-anchor="middle" class="module-label">元件清单 (BOM)</text>
+      
+      <!-- 表格内容 -->
+      <g font-size="10" fill="#333">
+        <text x="970" y="60" font-weight="bold">序号 | 标号 | 名称</text>
+        <line x1="965" y1="65" x2="1175" y2="65" stroke="#ccc"/>
+        
+        <text x="970" y="80">1 | U1 | MT3608 DC-DC</text>
+        <text x="970" y="95">2 | U2 | LM358 运放</text>
+        <text x="970" y="110">3 | U3 | TM1637 显示驱动</text>
+        <text x="970" y="125">4 | DB1 | 1N4007×4 整流桥</text>
+        <text x="970" y="140">5 | Rsense | 1Ω/1% 采样电阻</text>
+        <text x="970" y="155">6 | Rf1/Rf2 | 100kΩ 反馈电阻</text>
+        <text x="970" y="170">7 | R1/R2 | 1kΩ LED限流</text>
+        <text x="970" y="185">8 | R_disc | 100Ω/1W 放电</text>
+        <text x="970" y="200">9 | C1 | 100μF 储能</text>
+        <text x="970" y="215">10 | C2 | 0.1μF 滤波</text>
+        <text x="970" y="230">11 | C3 | 0.1μF 去耦</text>
+        <text x="970" y="245">12 | C4 | 1μF 去耦</text>
+        <text x="970" y="260">13 | L1 | 10μH 电感</text>
+        <text x="970" y="275">14 | J1 | 8Pin 排母</text>
+        <text x="970" y="290">15 | J2-J5 | 香蕉插座</text>
+        <text x="970" y="305">16 | F1 | 5A 保险丝</text>
+        <text x="970" y="320">17 | SW1 | 功能按键</text>
+        <text x="970" y="335">18 | SW2 | 4位拨码</text>
+        <text x="970" y="350">19 | SW_d | 放电按键</text>
+        <text x="970" y="365">20 | LED1/LED2 | LED指示灯</text>
+        <text x="970" y="380">21 | DS1 | 0.56" 数码管</text>
+        <text x="970" y="395">22 | MSPM0G3507 | MCU</text>
+      </g>
+      
+      <!-- 设计说明 -->
+      <text x="1070" y="430" text-anchor="middle" class="module-label">设计说明</text>
+      <line x1="965" y1="435" x2="1175" y2="435" stroke="#ccc"/>
+      <g font-size="9" fill="#555">
+        <text x="970" y="455">• 工作电压: 3.3V DC</text>
+        <text x="970" y="470">• 电流测量范围: 0.1~2A</text>
+        <text x="970" y="485">• 测量精度: ≤0.5%</text>
+        <text x="970" y="500">• 无线通信: 2.4GHz SPI</text>
+        <text x="970" y="515">• 显示: 4位数码管</text>
+        <text x="970" y="530">• 地址设置: 4位拨码开关</text>
+        <text x="970" y="545">• 电源: 电磁耦合取电</text>
+        <text x="970" y="560">• 保护: 5A保险丝</text>
+        <text x="970" y="575">• 放电回路: 100Ω/1W</text>
+      </g>
+      
+      <!-- 版本信息 -->
+      <text x="1070" y="600" text-anchor="middle" class="module-label">版本历史</text>
+      <line x1="965" y1="605" x2="1175" y2="605" stroke="#ccc"/>
+      <g font-size="9" fill="#555">
+        <text x="970" y="620">v1.0 - 2026-07-29</text>
+        <text x="970" y="635">初始版本</text>
+        <text x="970" y="650">作者: 参考设计</text>
+      </g>
+      
+      <!-- ========== 标题说明 ========== -->
+      <text x="600" y="880" text-anchor="middle" font-size="11" fill="#999">
+        电流表原理图参考设计 | MSPM0G3507 | 0.1-2A | 无线传输 | 注意: 高压危险，请勿带电操作
+      </text>
+      
+    </svg>
+  </div>
+  <div class="footer">
+    ⚠️ 本原理图仅供参考设计使用，实际制作前请进行电气安全评估和仿真验证
+  </div>
+</div>
+
+<script>
+  // 添加缩放功能
+  document.querySelector('.content').addEventListener('wheel', function(e) {
+    if (e.ctrlKey) {
+      e.preventDefault();
+      const svg = this.querySelector('svg');
+      const currentWidth = svg.style.width;
+      // 简单的缩放处理
+    }
+  });
+</script>
+</body>
+</html>

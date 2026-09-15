@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>热力学第二定律量化综合实验平台 · 答辩演示</title>
+<style>
+:root{
+  --ink:#eaf4ff; --dim:rgba(198,220,250,.66); --faint:rgba(170,195,235,.42);
+  --cyan:#5ee6ff; --cyan-soft:rgba(94,230,255,.16);
+  --mag:#c96bff; --warm:#ff9d5c;
+  --line:rgba(130,200,255,.16); --card:rgba(11,22,44,.62); --card-hi:rgba(16,32,64,.72);
+  --mono:'Consolas','JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#010208;overflow:hidden}
+body{font-family:'Microsoft YaHei','PingFang SC','Segoe UI',sans-serif;color:var(--ink)}
+
+/* ===== canvas ===== */
+#canvas{position:fixed;top:50%;left:50%;width:1280px;height:720px;transform:translate(-50%,-50%) scale(1);
+  background:#04060d;box-shadow:0 30px 90px rgba(0,0,0,.7),0 4px 18px rgba(0,0,0,.5);overflow:hidden;border-radius:6px}
+
+/* ===== slide base ===== */
+.slide{position:absolute;inset:0;opacity:0;visibility:hidden;padding:92px 64px 60px;transform:scale(1.028);
+  transition:opacity .55s cubic-bezier(.22,.7,.25,1),visibility .55s,transform .65s cubic-bezier(.22,.7,.25,1)}
+.slide.active{opacity:1;visibility:visible;z-index:2;transform:scale(1)}
+.bg{position:absolute;inset:0;background-size:cover;background-position:center;transform:scale(1.02);z-index:0}
+.slide.active .bg{animation:kb 26s ease-in-out infinite alternate}
+@keyframes kb{from{transform:scale(1.02)}to{transform:scale(1.09)}}
+.bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,5,13,.78),rgba(2,5,13,.5) 32%,rgba(2,5,13,.82))}
+.b-dark{background-image:url(assets/bg_dark.jpg)}
+.b-viz{background-image:url(assets/bg_viz.jpg)}
+.b-energy{background-image:url(assets/bg_energy.jpg)}
+.b-hero{background-image:url(assets/bg_hero.jpg)}
+.b-hero::after{background:linear-gradient(90deg,rgba(2,5,13,.1) 30%,rgba(2,5,13,.66) 62%,rgba(2,5,13,.9))}
+.wrap{position:relative;z-index:1;height:100%;display:flex;flex-direction:column}
+
+/* ===== staggered entrance ===== */
+.a{opacity:0;transform:translateY(26px);
+  transition:opacity .7s cubic-bezier(.22,.7,.25,1) var(--d,0s),transform .7s cubic-bezier(.22,.7,.25,1) var(--d,0s)}
+.slide.active .a{opacity:1;transform:none}
+
+/* ===== chrome ===== */
+#pbar{position:absolute;top:0;left:0;height:2px;width:0;z-index:9;
+  background:linear-gradient(90deg,var(--cyan),var(--mag));box-shadow:0 0 8px rgba(94,230,255,.8);
+  transition:width .5s cubic-bezier(.22,.7,.25,1)}
+#topnav{position:absolute;top:0;left:0;right:0;height:64px;z-index:8;display:flex;align-items:center;
+  justify-content:center;transition:opacity .5s,transform .5s}
+#topnav.hide{opacity:0;transform:translateY(-14px);pointer-events:none}
+.nav-box{position:relative;display:flex;gap:2px;padding:6px;border-radius:999px;
+  background:rgba(8,16,34,.55);border:1px solid var(--line);backdrop-filter:blur(10px);box-shadow:0 4px 24px rgba(0,0,0,.4)}
+.nav-it{position:relative;display:flex;align-items:center;gap:6px;border:0;background:transparent;cursor:pointer;
+  padding:7px 13px;border-radius:999px;color:var(--dim);font-family:inherit;font-size:13px;letter-spacing:.5px;
+  transition:color .35s}
+.nav-it .n-idx{font-family:var(--mono);font-size:10px;color:var(--faint);transition:color .35s}
+.nav-it:hover{color:var(--ink)}
+.nav-it.on{color:#fff;text-shadow:0 0 12px rgba(94,230,255,.9)}
+.nav-it.on .n-idx{color:var(--cyan)}
+#navind{position:absolute;bottom:3px;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--mag));box-shadow:0 0 10px rgba(94,230,255,.9);
+  transition:left .45s cubic-bezier(.3,.8,.3,1),width .45s cubic-bezier(.3,.8,.3,1)}
+.brand{position:absolute;top:20px;left:28px;z-index:8;font-family:var(--mono);font-size:11px;letter-spacing:2px;
+  color:var(--faint);transition:opacity .5s}
+.brand.hide{opacity:0}
+.chrome-b{position:absolute;bottom:0;left:0;right:0;height:42px;z-index:8;display:flex;align-items:center;
+  justify-content:space-between;padding:0 28px;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--faint)}
+.chrome-b .r{color:var(--dim)}
+#dots{position:absolute;bottom:15px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:8}
+.dot{width:6px;height:6px;border-radius:50%;background:rgba(150,190,240,.25);cursor:pointer;transition:all .35s}
+.dot.on{background:var(--cyan);box-shadow:0 0 8px rgba(94,230,255,.9);transform:scale(1.25)}
+
+/* ===== common ===== */
+.kicker{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:3px;color:var(--cyan);margin-bottom:14px}
+.kicker .ln{width:34px;height:1px;background:linear-gradient(90deg,var(--cyan),transparent)}
+.kicker .en{color:var(--faint);letter-spacing:2px}
+h2.title{font-size:31px;font-weight:700;letter-spacing:1px;margin-bottom:8px}
+h2.title em{font-style:normal;color:var(--cyan)}
+.lead{font-size:14.5px;color:var(--dim);margin-bottom:22px;letter-spacing:.5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;
+  backdrop-filter:blur(8px);transition:transform .4s,border-color .4s,box-shadow .4s}
+.card:hover{transform:translateY(-4px);border-color:rgba(94,230,255,.45);box-shadow:0 12px 34px rgba(0,10,30,.55),0 0 22px rgba(94,230,255,.12)}
+.card h4{font-size:16.5px;margin-bottom:8px;letter-spacing:.5px}
+.card p{font-size:13.5px;line-height:1.75;color:var(--dim)}
+.card .cno{font-family:var(--mono);font-size:11px;color:var(--cyan);letter-spacing:2px;display:block;margin-bottom:10px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);
+  background:rgba(10,20,40,.5);font-size:12.5px;color:var(--dim)}
+.chip b{color:var(--cyan);font-family:var(--mono);font-weight:600}
+.imgbox{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:rgba(255,255,255,.96);
+  min-height:0;display:flex;align-items:center;justify-content:center}
+.imgbox img{width:100%;height:100%;object-fit:cover;display:block}
+.imgbox.contain img{object-fit:contain}
+.imgbox.dk{background:rgba(8,16,34,.7)}
+.cap{font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:1px;text-align:center;margin-top:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;min-height:0;flex:1}
+.hl{color:var(--cyan)}
+.formula{font-family:var(--mono);background:rgba(6,12,26,.75);border:1px solid var(--line);border-radius:10px;
+  padding:12px 16px;font-size:14px;color:#bfe9ff;letter-spacing:.5px}
+.formula small{display:block;color:var(--faint);font-size:10.5px;margin-top:5px;letter-spacing:1px}
+.arrow-r{display:flex;align-items:center;color:var(--cyan);font-size:18px;opacity:.85}
+
+/* ===== S1 cover ===== */
+.s-cover{padding:0}
+.s-cover .wrap{flex-direction:row;align-items:center;justify-content:flex-end}
+.cover-box{width:46%;padding:0 60px 0 0}
+.cover-box .k1{font-family:var(--mono);font-size:12px;letter-spacing:4px;color:var(--cyan);margin-bottom:20px}
+.cover-box h1{font-size:43px;line-height:1.28;font-weight:800;letter-spacing:2px;margin-bottom:18px}
+.cover-box h1 .t2{display:block;background:linear-gradient(90deg,var(--cyan),var(--mag));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cover-box .sub{font-size:14.5px;color:var(--dim);line-height:1.9;margin-bottom:26px}
+.cover-chips{display:flex;flex-wrap:wrap;gap:10px}
+.cover-meta{position:absolute;bottom:52px;right:64px;font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--faint)}
+
+/* ===== S2 agenda ===== */
+.agenda{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;flex:1;align-content:center;max-height:480px}
+.ag-it{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 18px;cursor:pointer;
+  transition:transform .4s,border-color .4s,background .4s}
+.ag-it:hover{transform:translateY(-5px);border-color:rgba(94,230,255,.5);background:var(--card-hi)}
+.ag-it .no{font-family:var(--mono);font-size:22px;color:var(--cyan);display:block;margin-bottom:10px}
+.ag-it h4{font-size:17px;margin-bottom:7px}
+.ag-it p{font-size:12px;color:var(--dim);line-height:1.6}
+.ag-it.ghost{background:transparent;border-style:dashed;display:flex;align-items:center;justify-content:center;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:2px}
+
+/* ===== S3 pain ===== */
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;flex:1;align-content:center;max-height:420px}
+.pain-ic{font-size:26px;margin-bottom:14px;display:block}
+.vs-bar{display:flex;align-items:center;gap:14px;margin:4px 0 16px}
+.vs-side{flex:1;display:flex;align-items:center;gap:12px;padding:12px 18px;border-radius:12px;border:1px solid var(--line);background:rgba(10,18,38,.55)}
+.vs-side.bad{border-color:rgba(255,157,92,.4)}
+.vs-side.good{border-color:rgba(94,230,255,.45)}
+.vs-tag{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;padding:4px 10px;border-radius:6px}
+.vs-side.bad .vs-tag{background:rgba(255,157,92,.16);color:var(--warm)}
+.vs-side.good .vs-tag{background:rgba(94,230,255,.16);color:var(--cyan)}
+.vs-txt{font-size:13.5px;color:var(--dim);letter-spacing:.5px}
+.vs-vs{flex:0 0 48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--cyan),var(--mag));color:#fff;font-family:var(--mono);font-size:14px;font-weight:700;
+  box-shadow:0 0 18px rgba(94,230,255,.45)}
+
+/* ===== S4 solution ===== */
+.sol{display:grid;grid-template-columns:46% 1fr;gap:26px;flex:1;min-height:0}
+.quote{border-left:3px solid var(--cyan);padding:12px 16px;background:rgba(8,18,38,.6);border-radius:0 10px 10px 0;
+  font-size:14px;color:#cfe9ff;line-height:1.8;margin-bottom:18px}
+.quote small{display:block;font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:6px;letter-spacing:2px}
+.sol-li{display:flex;gap:13px;margin-bottom:14px;align-items:flex-start}
+.sol-li .ic{flex:0 0 34px;height:34px;border-radius:9px;background:var(--cyan-soft);border:1px solid rgba(94,230,255,.3);
+  display:flex;align-items:center;justify-content:center;font-size:15px}
+.sol-li b{display:block;font-size:14.5px;margin-bottom:3px}
+.sol-li p{font-size:12.5px;color:var(--dim);line-height:1.65}
+
+/* ===== S5 statements ===== */
+.stmt{display:grid;grid-template-columns:1fr 1fr;gap:22px;flex:1;align-content:center;max-height:400px}
+.stmt .card{padding:26px}
+.stmt .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:2px;padding:5px 12px;border-radius:999px;margin-bottom:16px}
+.stmt .t1 .tag{background:rgba(94,230,255,.14);color:var(--cyan);border:1px solid rgba(94,230,255,.35)}
+.stmt .t2 .tag{background:rgba(201,107,255,.14);color:#d9a8ff;border:1px solid rgba(201,107,255,.35)}
+.stmt .body{font-size:15px;line-height:2;color:#dcecff}
+.stmt .body b{color:var(--cyan)}
+.foot-line{text-align:center;font-size:13.5px;color:var(--dim);margin-top:20px;letter-spacing:1px}
+.foot-line b{color:var(--warm)}
+.dir-viz{margin-top:14px;padding:14px 18px;border-radius:12px;border:1px solid var(--line);background:rgba(8,16,34,.55)}
+.dv-row{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:10px}
+.dv-ic{font-size:20px}
+.dv-hot{font-size:15px;color:var(--warm);font-weight:700;letter-spacing:1px}
+.dv-cold{font-size:15px;color:var(--cyan);font-weight:700;letter-spacing:1px}
+.dv-arr{font-family:var(--mono);font-size:12.5px;padding:4px 12px;border-radius:8px;letter-spacing:1px}
+.dv-arr.up{background:rgba(255,157,92,.14);color:var(--warm);border:1px solid rgba(255,157,92,.4)}
+.dv-arr.dn{background:rgba(94,230,255,.14);color:var(--cyan);border:1px solid rgba(94,230,255,.4)}
+.dv-note{text-align:center;font-size:12.5px;color:var(--dim);line-height:1.7}
+.dv-note b{color:var(--warm)}
+
+/* ===== S6 routes ===== */
+.routes{flex:1;display:flex;flex-direction:column;justify-content:center;max-height:430px;gap:11px}
+.rt{display:flex;align-items:center;gap:16px;padding:13px 20px;border-radius:12px;border:1px solid var(--line);
+  background:rgba(10,18,38,.5);transition:transform .35s,border-color .35s}
+.rt:hover{transform:translateX(6px);border-color:rgba(94,230,255,.4)}
+.rt .rn{font-family:var(--mono);font-size:13px;color:var(--faint);width:30px}
+.rt b{font-size:15px;width:150px;letter-spacing:1px}
+.rt p{font-size:12.5px;color:var(--dim);flex:1}
+.rt.star{border-color:rgba(255,157,92,.55);background:linear-gradient(90deg,rgba(255,157,92,.14),rgba(10,18,38,.5))}
+.rt.star .rn{color:var(--warm)}
+.rt .badge{font-size:11px;padding:3px 10px;border-radius:999px;background:rgba(255,157,92,.18);color:var(--warm);letter-spacing:1px}
+
+/* ===== S7 cycle svg ===== */
+.cyc{display:grid;grid-template-columns:44% 1fr;gap:24px;flex:1;min-height:0;align-items:center}
+.cyc-left .card{margin-bottom:14px}
+.cyc-svg{background:rgba(6,12,26,.55);border:1px solid var(--line);border-radius:16px;padding:10px;height:100%;display:flex;align-items:center;justify-content:center}
+.cyc-svg svg{width:100%;height:100%;max-height:440px}
+.svg-lb{fill:#dcecff;font-size:15px;font-weight:700}
+.svg-sub{fill:rgba(198,220,250,.62);font-size:10.5px}
+.svg-flow{fill:#9fdcff;font-size:11.5px;letter-spacing:1px}
+
+/* ===== S8 arch ===== */
+.arch{display:grid;grid-template-columns:1fr 44%;gap:24px;flex:1;min-height:0}
+.arch-cards{display:flex;flex-direction:column;gap:14px;justify-content:center}
+.arch-cards .card{display:flex;gap:16px;align-items:flex-start;padding:17px 20px}
+.arch-cards .ic{flex:0 0 40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;
+  background:var(--cyan-soft);border:1px solid rgba(94,230,255,.3)}
+
+/* ===== S9 cycle sys ===== */
+.chip-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:16px 0 20px}
+.cf-it{padding:9px 15px;border-radius:10px;border:1px solid rgba(94,230,255,.3);background:rgba(9,20,40,.65);
+  font-size:13px;letter-spacing:1px}
+.cf-it.hot{border-color:rgba(255,157,92,.5);color:#ffd2ad}
+.cf-it.cold{border-color:rgba(94,230,255,.5);color:#bfeeff}
+.params{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:4px}
+.pm{background:rgba(8,16,34,.65);border:1px solid var(--line);border-radius:12px;padding:13px 15px;text-align:center}
+.pm .v{font-family:var(--mono);font-size:19px;color:var(--cyan);display:block;margin-bottom:4px}
+.pm .k{font-size:11.5px;color:var(--dim);letter-spacing:1px}
+
+/* ===== S10 trio ===== */
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;flex:1;min-height:0;align-content:center;max-height:460px}
+.trio .card{padding:16px;display:flex;flex-direction:column}
+.trio .imgbox{height:158px}
+.trio .spec{margin-top:12px;font-size:12px;color:var(--dim);line-height:1.7}
+.trio .spec b{color:var(--cyan);font-family:var(--mono)}
+
+/* ===== S13 gallery ===== */
+.gal{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:16px;flex:1;min-height:0;max-height:380px}
+.gal .imgbox{height:100%}
+.inter-chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+
+/* ===== S14 timeline ===== */
+.tl{flex:1;display:flex;align-items:center;max-height:430px}
+.tl-track{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;width:100%;position:relative}
+.tl-track::before{content:'';position:absolute;top:23px;left:4%;right:4%;height:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--mag));opacity:.5}
+.tl-it{position:relative;text-align:center;padding-top:0}
+.tl-it .nd{width:46px;height:46px;margin:0 auto 14px;border-radius:50%;background:rgba(8,18,38,.9);
+  border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:15px;color:var(--cyan);box-shadow:0 0 16px rgba(94,230,255,.35);position:relative;z-index:1}
+.tl-it:nth-child(even) .nd{border-color:var(--mag);color:#e3b8ff;box-shadow:0 0 16px rgba(201,107,255,.35)}
+.tl-it h5{font-size:14.5px;margin-bottom:7px}
+.tl-it p{font-size:11.5px;color:var(--dim);line-height:1.65}
+.tl-it .tm{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:6px;letter-spacing:1px}
+
+/* ===== S15 results ===== */
+.res{display:grid;grid-template-columns:40% 1fr;gap:24px;flex:1;min-height:0}
+.mets{display:flex;flex-direction:column;gap:14px;justify-content:center}
+.met{background:rgba(8,16,34,.65);border:1px solid var(--line);border-radius:14px;padding:16px 20px}
+.met .v{font-family:var(--mono);font-size:30px;color:var(--cyan)}
+.met .v.warm{color:var(--warm)}
+.met .k{font-size:12.5px;color:var(--dim);margin-top:4px;letter-spacing:1px}
+.res-charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-content:center}
+.res-charts .imgbox{height:180px;background:#fff}
+.concl{grid-column:1/-1;font-size:13px;color:#cfe9ff;background:rgba(94,230,255,.08);border:1px solid rgba(94,230,255,.25);
+  border-radius:10px;padding:11px 16px;text-align:center;letter-spacing:.5px}
+
+/* ===== S16 innovation ===== */
+.inno{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;flex:1;align-content:center;max-height:340px}
+.inno .card .big{font-size:19px;margin-bottom:8px}
+.inno-strip{display:flex;gap:12px;margin-top:18px}
+.inno-strip .pm{flex:1;display:flex;align-items:baseline;justify-content:center;gap:8px;padding:14px}
+.inno-strip .pm .v{font-size:20px;margin:0}
+.inno-strip .pm .k{font-size:12px}
+.cmp-strip{display:flex;align-items:center;gap:16px;margin:6px 0 14px}
+.cmp-it{flex:1;display:flex;flex-direction:column;gap:4px;padding:12px 18px;border-radius:12px;border:1px solid var(--line);background:rgba(10,18,38,.55)}
+.cmp-k{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--faint)}
+.cmp-v{font-size:15px;font-weight:700;letter-spacing:.5px}
+.cmp-v.bad{color:var(--warm)}
+.cmp-v.good{color:var(--cyan)}
+.cmp-arrow{font-size:22px;color:var(--cyan);opacity:.8}
+
+/* ===== S17 summary ===== */
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:22px;flex:1;align-content:center;max-height:420px}
+.sum .card{padding:24px}
+.sum h4{display:flex;align-items:center;gap:9px;font-size:17px;margin-bottom:16px}
+.sum h4 .ic{font-size:18px}
+.sum li{list-style:none;font-size:13.5px;color:var(--dim);line-height:1.8;padding-left:18px;position:relative;margin-bottom:9px}
+.sum li::before{content:'';position:absolute;left:0;top:10px;width:7px;height:7px;border-radius:2px;background:var(--cyan);box-shadow:0 0 6px rgba(94,230,255,.7)}
+.sum .future li::before{background:var(--mag);box-shadow:0 0 6px rgba(201,107,255,.7)}
+.app-strip{display:flex;gap:14px;margin-top:16px}
+.app-it{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 12px;border-radius:12px;
+  border:1px solid var(--line);background:rgba(10,18,38,.55);font-size:14px;color:var(--dim);letter-spacing:.5px;
+  transition:transform .35s,border-color .35s}
+.app-it:hover{transform:translateY(-3px);border-color:rgba(94,230,255,.4)}
+.app-ic{font-size:20px}
+
+/* ===== S18 closing ===== */
+.s-end{padding:0}
+.s-end .wrap{align-items:center;justify-content:center;text-align:center}
+.end-k{font-family:var(--mono);font-size:13px;letter-spacing:6px;color:var(--cyan);margin-bottom:26px}
+.end-t{font-size:52px;font-weight:800;letter-spacing:10px;margin-bottom:18px;
+  background:linear-gradient(90deg,#fff,var(--cyan) 60%,var(--mag));-webkit-background-clip:text;background-clip:text;color:transparent}
+.end-s{font-size:15px;color:var(--dim);letter-spacing:3px}
+</style>
+</head>
+<body>
+<div id="canvas">
+  <div id="pbar"></div>
+  <div class="brand" id="brand">THERMODYNAMICS · 2ND LAW LAB</div>
+
+  <nav id="topnav">
+    <div class="nav-box" id="navbox"></div>
+  </nav>
+
+  <!-- 1 封面 -->
+  <section class="slide s-cover active">
+    <div class="bg b-hero"></div>
+    <div class="wrap">
+      <div class="cover-box">
+        <div class="k1 a" style="--d:.05s">PHYSICS INNOVATION COMPETITION · 物理实验创新竞赛</div>
+        <h1 class="a" style="--d:.15s">热力学第二定律<span class="t2">量化综合实验平台</span></h1>
+        <div class="sub a" style="--d:.3s">基于真实制冷循环与 PLC 智能监测，<br>将抽象定律转化为可测、可视、可算的热力过程</div>
+        <div class="cover-chips a" style="--d:.45s">
+          <span class="chip"><b>01</b>制冷循环</span>
+          <span class="chip"><b>02</b>PLC 智能监测</span>
+          <span class="chip"><b>03</b>定量可视化</span>
+        </div>
+      </div>
+    </div>
+    <div class="cover-meta a" style="--d:.6s">QUANTITATIVE · VISUALIZED · INTELLIGENT</div>
+  </section>
+
+  <!-- 2 目录 -->
+  <section class="slide">
+    <div class="bg b-dark"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>CONTENTS</span><span class="ln"></span><span class="en">答辩目录</span></div>
+      <h2 class="title a" style="--d:.06s">汇报框架 · <em>七大板块</em></h2>
+      <div class="agenda">
+        <div class="ag-it a" style="--d:.12s" data-go="2"><span class="no">01</span><h4>研究背景</h4><p>教学痛点与破局思路</p></div>
+        <div class="ag-it a" style="--d:.18s" data-go="4"><span class="no">02</span><h4>物理原理</h4><p>两种表述 · 逆卡诺循环</p></div>
+        <div class="ag-it a" style="--d:.24s" data-go="7"><span class="no">03</span><h4>设计方案</h4><p>循环 · 测量 · 智控三系统</p></div>
+        <div class="ag-it a" style="--d:.3s" data-go="11"><span class="no">04</span><h4>可视化系统</h4><p>四类热力图实时渲染</p></div>
+        <div class="ag-it a" style="--d:.36s" data-go="13"><span class="no">05</span><h4>实验步骤</h4><p>从定性观察到定量验证</p></div>
+        <div class="ag-it a" style="--d:.42s" data-go="15"><span class="no">06</span><h4>创新性</h4><p>可视化 · 定量化 · 智能化</p></div>
+        <div class="ag-it a" style="--d:.48s" data-go="16"><span class="no">07</span><h4>总结展望</h4><p>结论与研究方向延伸</p></div>
+        <div class="ag-it ghost a" style="--d:.54s">5 MIN TALK · 18 SLIDES</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 背景痛点 -->
+  <section class="slide">
+    <div class="bg b-dark"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>01</span><span class="ln"></span><span class="en">研究背景</span></div>
+      <h2 class="title a" style="--d:.06s">定律很抽象，<em>教具跟不上</em></h2>
+      <p class="lead a" style="--d:.1s">热力学第二定律是热工核心理论，但现有实验条件难以支撑定量教学 —— 来源：PW Consulting《2025 热工教学设备调研报告》</p>
+      <div class="vs-bar a" style="--d:.14s">
+        <div class="vs-side bad"><span class="vs-tag">传统教具</span><span class="vs-txt">仅测温 · 无曲线 · 高成本</span></div>
+        <div class="vs-vs"><span>VS</span></div>
+        <div class="vs-side good"><span class="vs-tag">本平台</span><span class="vs-txt">多参数同步 · 实时热力曲线 · 低成本</span></div>
+      </div>
+      <div class="cards3">
+        <div class="card a" style="--d:.18s"><span class="pain-ic">🌫️</span><h4>概念抽象难懂</h4><p>能量转换与热传递的「方向性」看不见摸不着，学生只能靠公式想象熵增过程。</p></div>
+        <div class="card a" style="--d:.28s"><span class="pain-ic">💰</span><h4>设备造价高昂</h4><p>海外高校现有制冷实验台价格昂贵，普通教学实验室难以批量配置。</p></div>
+        <div class="card a" style="--d:.38s"><span class="pain-ic">📉</span><h4>只能简单测温</h4><p>缺少实时热力曲线生成能力，无法对热量逆向传递规律做定量展示与分析。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 破局思路 -->
+  <section class="slide">
+    <div class="bg b-dark"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>01</span><span class="ln"></span><span class="en">研究背景</span></div>
+      <h2 class="title a" style="--d:.06s">破局思路：<em>把定律装进一台真实的制冷机</em></h2>
+      <div class="sol" style="margin-top:14px">
+        <div class="a" style="--d:.18s;display:flex;flex-direction:column;min-height:0">
+          <div class="imgbox" style="flex:1"><img src="assets/d_device.jpg" alt="实验装置实拍图"></div>
+          <div class="cap">实验装置实物 · 自主分立式搭建</div>
+        </div>
+        <div style="display:flex;flex-direction:column;justify-content:center;min-height:0">
+          <div class="quote a" style="--d:.2s">不可能把热量从低温物体传到高温物体，而不引起其他变化。<small>—— 克劳修斯表述 · 本装置的验证目标</small></div>
+          <div class="sol-li a" style="--d:.32s"><div class="ic">🔄</div><div><b>真实制冷循环具象呈现</b><p>冷凝器吹热风、蒸发器吹冷风，热量逆向传递全程可感知。</p></div></div>
+          <div class="sol-li a" style="--d:.42s"><div class="ic">📡</div><div><b>PLC 多参数同步采集</b><p>温度、压力、电压、电流一次接入，实时生成热力曲线。</p></div></div>
+          <div class="sol-li a" style="--d:.52s"><div class="ic">🧮</div><div><b>低成本定量验证</b><p>以熵流与 COP 计算量化呈现第二定律，整机成本可控。</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 两种表述 -->
+  <section class="slide">
+    <div class="bg b-energy"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>02</span><span class="ln"></span><span class="en">物理原理</span></div>
+      <h2 class="title a" style="--d:.06s">热力学第二定律 · <em>两种经典表述</em></h2>
+      <div class="stmt">
+        <div class="card t1 a" style="--d:.18s"><span class="tag">CLAUSIUS · 克劳修斯表述 ★ 本装置验证</span>
+          <div class="body">不可能实现一个循环过程，其唯一结果是热量从<b>低温热源</b>传向<b>高温热源</b>。<br>—— 传热有方向，逆向须付出代价。</div></div>
+        <div class="card t2 a" style="--d:.3s"><span class="tag">KELVIN-PLANCK · 开尔文-普朗克表述</span>
+          <div class="body">不可能从单一热源吸热，使之<b>完全变为功</b>而不产生其他效果。<br>—— 热机效率必有上限，不可能达 100%。</div></div>
+      </div>
+      <div class="foot-line a" style="--d:.44s">本装置以制冷循环实现「热量逆向传递」，为<b>克劳修斯表述</b>提供可视化 + 定量的双重实证</div>
+      <div class="dir-viz a" style="--d:.52s">
+        <div class="dv-row"><span class="dv-ic">🔥</span><span class="dv-hot">高温热源</span>
+          <span class="dv-arr up" title="需消耗功">↑ 需做功 W</span>
+          <span class="dv-arr dn" title="自发">↓ 自发</span>
+          <span class="dv-cold">低温热源</span><span class="dv-ic">❄️</span></div>
+        <div class="dv-note"><b>克劳修斯</b>：热量不会自发从低温传向高温 —— 逆向必须以外功为代价（本装置验证）</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 验证路径 -->
+  <section class="slide">
+    <div class="bg b-energy"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>02</span><span class="ln"></span><span class="en">物理原理</span></div>
+      <h2 class="title a" style="--d:.06s">五条验证路径，<em>我们选择综合设计</em></h2>
+      <div class="routes">
+        <div class="rt a" style="--d:.14s"><span class="rn">A</span><b>卡诺热机实验</b><p>理想热机由两个等温、两个绝热过程组成，效率只取决于两热源温差。</p></div>
+        <div class="rt a" style="--d:.2s"><span class="rn">B</span><b>热电偶实验</b><p>温差产生电动势，验证热能 ↔ 电能转换的方向性。</p></div>
+        <div class="rt a" style="--d:.26s"><span class="rn">C</span><b>布朗运动实验</b><p>微粒无序运动直观支持熵增原理。</p></div>
+        <div class="rt a" style="--d:.32s"><span class="rn">D</span><b>渗透压实验</b><p>物质自发从高浓度向低浓度扩散，直至平衡。</p></div>
+        <div class="rt star a" style="--d:.4s"><span class="rn">E</span><b>制冷循环实验</b><p>消耗外功实现热量「由低到高」的非自然传递 —— 最贴近工程实际的第二定律载体。</p><span class="badge">本装置选择 · 综合设计</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 逆卡诺循环 -->
+  <section class="slide">
+    <div class="bg b-energy"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>02</span><span class="ln"></span><span class="en">物理原理</span></div>
+      <h2 class="title a" style="--d:.06s">核心引擎：<em>逆卡诺制冷循环</em></h2>
+      <div class="cyc" style="margin-top:8px">
+        <div class="cyc-left">
+          <div class="card a" style="--d:.16s"><h4>🔁 过程本质</h4><p>压缩机消耗功 W，驱动工质把热量 Q₀ 从低温热源「搬」到高温热源并放出 Q<sub>K</sub> —— 逆向传热必须以外功为代价。</p></div>
+          <div class="formula a" style="--d:.26s">COP = q₀ / w = (h₁−h₄)/(h₂−h₁)<small>实际制冷系数 = 单位制冷量 ÷ 单位压缩功</small></div>
+          <div class="formula a" style="--d:.36s">COP<sub>carnot</sub> = T<sub>e</sub> / (T<sub>c</sub> − T<sub>e</sub>)<small>卡诺理论上限 · 实际 COP 恒小于它，即第二定律的定量体现</small></div>
+        </div>
+        <div class="cyc-svg a" style="--d:.28s">
+          <svg viewBox="0 0 560 430">
+            <defs>
+              <marker id="ac" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#5ee6ff"/></marker>
+              <marker id="aw" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#ff9d5c"/></marker>
+              <marker id="av" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#c96bff"/></marker>
+            </defs>
+            <path d="M230,330 L370,330" stroke="#5ee6ff" stroke-width="2.5" marker-end="url(#ac)" fill="none"/>
+            <path d="M450,290 L450,150" stroke="#ff9d5c" stroke-width="2.5" marker-end="url(#aw)" fill="none"/>
+            <path d="M370,95 L230,95" stroke="#ff9d5c" stroke-width="2.5" marker-end="url(#aw)" fill="none"/>
+            <path d="M110,150 L110,290" stroke="#c96bff" stroke-width="2.5" marker-end="url(#av)" fill="none"/>
+            <path d="M60,395 L60,360" stroke="#5ee6ff" stroke-width="2" marker-end="url(#ac)" fill="none"/>
+            <path d="M500,60 L500,20" stroke="#ff9d5c" stroke-width="2" marker-end="url(#aw)" fill="none"/>
+            <g>
+              <rect x="20" y="300" width="180" height="60" rx="12" fill="rgba(94,230,255,.1)" stroke="#5ee6ff" stroke-width="1.6"/>
+              <text x="110" y="326" text-anchor="middle" class="svg-lb">蒸发器</text>
+              <text x="110" y="347" text-anchor="middle" class="svg-sub">低温热源 · 定温吸热</text>
+              <rect x="360" y="300" width="180" height="60" rx="12" fill="rgba(94,230,255,.12)" stroke="#5ee6ff" stroke-width="1.6"/>
+              <text x="450" y="326" text-anchor="middle" class="svg-lb">压缩机</text>
+              <text x="450" y="347" text-anchor="middle" class="svg-sub">定熵压缩 · 消耗功 W</text>
+              <rect x="360" y="65" width="180" height="60" rx="12" fill="rgba(255,157,92,.12)" stroke="#ff9d5c" stroke-width="1.6"/>
+              <text x="450" y="91" text-anchor="middle" class="svg-lb">冷凝器</text>
+              <text x="450" y="112" text-anchor="middle" class="svg-sub">高温热源 · 定温放热</text>
+              <rect x="20" y="65" width="180" height="60" rx="12" fill="rgba(201,107,255,.12)" stroke="#c96bff" stroke-width="1.6"/>
+              <text x="110" y="91" text-anchor="middle" class="svg-lb">毛细管</text>
+              <text x="110" y="112" text-anchor="middle" class="svg-sub">等焓节流 · 压力骤降</text>
+            </g>
+            <text x="300" y="318" text-anchor="middle" class="svg-flow">低压气态 ↑升压升温</text>
+            <text x="473" y="225" class="svg-flow" transform="rotate(-90 473 225)">高温高压气体</text>
+            <text x="300" y="84" text-anchor="middle" class="svg-flow">高压液体 ← 释放 QK</text>
+            <text x="87" y="225" class="svg-flow" transform="rotate(90 87 225)">低温两相 · 降温</text>
+            <text x="60" y="418" text-anchor="middle" class="svg-flow" fill="#9fdcff">吸入 Q₀ (冷量)</text>
+            <text x="500" y="12" text-anchor="middle" class="svg-flow">排出 QK (热风)</text>
+            <text x="280" y="220" text-anchor="middle" fill="rgba(234,244,255,.85)" font-size="17" font-weight="700" letter-spacing="2">逆 卡 诺 循 环</text>
+            <text x="280" y="244" text-anchor="middle" class="svg-sub">热量逆向传递 · 以功为代价</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 总体架构 -->
+  <section class="slide">
+    <div class="bg b-dark"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>03</span><span class="ln"></span><span class="en">设计方案</span></div>
+      <h2 class="title a" style="--d:.06s">总体架构：<em>三大系统一体化</em></h2>
+      <div class="arch" style="margin-top:12px">
+        <div class="arch-cards">
+          <div class="card a" style="--d:.16s"><div class="ic">❄️</div><div><h4>卡诺循环系统</h4><p>压缩机 · 蒸发器 · 冷凝器 · 干燥过滤器 · 毛细管 · 卡诺管，构成真实制冷回路。</p></div></div>
+          <div class="card a" style="--d:.26s"><div class="ic">🌡️</div><div><h4>测量装置</h4><p>热电阻温度传感器（8 测点）＋ 数字远传压力表 ＋ 电压/电流表，全状态感知。</p></div></div>
+          <div class="card a" style="--d:.36s"><div class="ic">🖥️</div><div><h4>智能控制系统</h4><p>PLC 可编程控制器 ＋ 触摸屏，Modbus RTU 组网，数据直达屏幕。</p></div></div>
+        </div>
+        <div class="a" style="--d:.3s;display:flex;flex-direction:column;min-height:0">
+          <div class="imgbox contain" style="flex:1"><img src="assets/d_arch.jpg" alt="实验装置系统组成框图"></div>
+          <div class="cap">装置系统组成框图</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 循环系统 -->
+  <section class="slide">
+    <div class="bg b-dark"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>03</span><span class="ln"></span><span class="en">设计方案 · 卡诺循环系统</span></div>
+      <h2 class="title a" style="--d:.06s">一条回路，<em>走完热量的旅程</em></h2>
+      <div class="chip-flow a" style="--d:.16s">
+        <span class="cf-it cold">蒸发器</span><span class="arrow-r">→</span>
+        <span class="cf-it">压缩机</span><span class="arrow-r">→</span>
+        <span class="cf-it hot">冷凝器</span><span class="arrow-r">→</span>
+        <span class="cf-it">干燥过滤器</span><span class="arrow-r">→</span>
+        <span class="cf-it">毛细管</span><span class="arrow-r">→</span>
+        <span class="cf-it cold">卡诺管 · 回到压缩机</span>
+      </div>
+      <div class="grid2" style="max-height:330px">
+        <div class="a" style="--d:.28s;display:flex;flex-direction:column;min-height:0">
+          <div class="imgbox" style="flex:1"><img src="assets/d_pipe.jpg" alt="制冷回路管路实拍"></div>
+          <div class="cap">压缩机 · 换热器 · 铜管回路实拍</div>
+        </div>
+        <div style="display:flex;flex-direction:column;justify-content:center;min-height:0">
+          <div class="params">
+            <div class="pm a" style="--d:.34s"><span class="v">1745<span style="font-size:12px">W</span></span><span class="k">制冷量</span></div>
+            <div class="pm a" style="--d:.4s"><span class="v">585<span style="font-size:12px">W</span></span><span class="k">输入功率</span></div>
+            <div class="pm a" style="--d:.46s"><span class="v">R22</span><span class="k">制冷剂</span></div>
+            <div class="pm a" style="--d:.52s"><span class="v">10<span style="font-size:12px">kg</span></span><span class="k">转子式压缩机</span></div>
+          </div>
+          <div class="card a" style="--d:.58s;margin-top:14px"><p style="font-size:13px">高压侧冷凝放热、低压侧蒸发吸热，节流前后压差清晰可测 —— <span class="hl">循环四状态全部落在量程内，专为教学观测设计</span>。</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 测量装置 -->
+  <section class="slide">
+    <div class="bg b-dark"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>03</span><span class="ln"></span><span class="en">设计方案 · 测量装置</span></div>
+      <h2 class="title a" style="--d:.06s">温度 · 压力 · 功率，<em>全状态感知</em></h2>
+      <div class="trio">
+        <div class="card a" style="--d:.18s">
+          <div class="imgbox"><img src="assets/d_temp.jpg" alt="智能温控仪表实物"></div>
+          <div class="spec"><b>温度</b> ｜ PT100 热电阻 × 11<br>冷凝/蒸发出口各 4 测点均布取均值，模糊 PID 温控仪表</div>
+        </div>
+        <div class="card a" style="--d:.28s">
+          <div class="imgbox"><img src="assets/d_press.jpg" alt="数字远传压力表"></div>
+          <div class="spec"><b>压力</b> ｜ SUP-YC180 远传表<br>量程 0~4MPa · 准确度 0.5%FS，高低压实时远传</div>
+        </div>
+        <div class="card a" style="--d:.38s">
+          <div class="imgbox"><img src="assets/d_power.jpg" alt="电压电流表"></div>
+          <div class="spec"><b>功率</b> ｜ 85L17 电压/电流表<br>0~250V · 0~10A，压缩机输入功率 q = U×I×92%</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 智能控制 -->
+  <section class="slide">
+    <div class="bg b-dark"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>03</span><span class="ln"></span><span class="en">设计方案 · 智能控制系统</span></div>
+      <h2 class="title a" style="--d:.06s">自主设计 PLC + 触摸屏，<em>数据直达屏幕</em></h2>
+      <div class="grid2" style="max-height:360px;margin-top:10px">
+        <div class="a" style="--d:.18s;display:flex;flex-direction:column;min-height:0">
+          <div class="imgbox contain" style="flex:1"><img src="assets/d_plc.jpg" alt="PLC 可编程控制器模块"></div>
+          <div class="cap">AMX-FX3U-M 可编程控制器</div>
+        </div>
+        <div class="a" style="--d:.28s;display:flex;flex-direction:column;min-height:0">
+          <div class="imgbox" style="flex:1"><img src="assets/d_screen.jpg" alt="触摸屏实时数据显示"></div>
+          <div class="cap">mcgsTpc 触摸屏 · 实时画面</div>
+        </div>
+      </div>
+      <div class="inter-chips a" style="--d:.4s;margin-top:18px">
+        <span class="chip"><b>Modbus RTU</b>仪表 ↔ PLC 标准协议</span>
+        <span class="chip"><b>RS-485</b>短距离低速 · 低成本组网</span>
+        <span class="chip"><b>自主编程</b>梯形图 + I/O 映射 + 数据双向传输</span>
+        <span class="chip"><b>1 s 级</b>画面随实测同步刷新</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 可视化数据流 -->
+  <section class="slide">
+    <div class="bg b-viz"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>04</span><span class="ln"></span><span class="en">可视化系统</span></div>
+      <h2 class="title a" style="--d:.06s">从寄存器到曲线，<em>只要两秒</em></h2>
+      <p class="lead a" style="--d:.1s">自主开发浏览器端可视化系统：采集 → 计算 → 渲染 → 联动，四环节同一循环驱动</p>
+      <div style="display:flex;align-items:stretch;gap:10px;margin:6px 0 20px">
+        <div class="card a" style="--d:.18s;flex:1"><span class="cno">STEP 1 · 采集</span><h4>PLC → JSON</h4><p>MC 协议读取 D 寄存器，本机 HTTP 推送；无 PLC 时自动切模拟源，支持离线演示。</p></div>
+        <div class="arrow-r a" style="--d:.24s">➤</div>
+        <div class="card a" style="--d:.28s;flex:1"><span class="cno">STEP 2 · 计算</span><h4>还原循环状态</h4><p>由实测高/低压反推四个状态点，计算 COP、熵流等衍生量（R22 物性插值）。</p></div>
+        <div class="arrow-r a" style="--d:.34s">➤</div>
+        <div class="card a" style="--d:.38s;flex:1"><span class="cno">STEP 3 · 渲染</span><h4>Canvas 三级映射</h4><p>数据域 → 归一化 → 视窗 → 像素，逐级解耦，兼容线性/对数坐标轴。</p></div>
+        <div class="arrow-r a" style="--d:.44s">➤</div>
+        <div class="card a" style="--d:.48s;flex:1"><span class="cno">STEP 4 · 联动</span><h4>图数同步</h4><p>图表与 Excel 导出由同一采集循环驱动，历史缓冲随开随现。</p></div>
+      </div>
+      <div class="inter-chips a" style="--d:.58s">
+        <span class="chip"><b>2 s</b>以太网网关刷新周期</span>
+        <span class="chip"><b>0 依赖</b>不联网 · 零第三方库</span>
+        <span class="chip"><b>1~20×</b>以光标为锚点跟手缩放</span>
+        <span class="chip"><b>20,000 行</b>本地记录上限 · 断电不丢</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 四类热力图 -->
+  <section class="slide">
+    <div class="bg b-viz"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>04</span><span class="ln"></span><span class="en">可视化系统</span></div>
+      <h2 class="title a" style="--d:.06s">四类专业热力图，<em>实时循迹</em></h2>
+      <div class="gal" style="margin-top:14px">
+        <div class="a" style="--d:.16s;display:flex;flex-direction:column;min-height:0">
+          <div class="imgbox dk" style="flex:1"><img src="assets/v_phs.jpg" alt="P-h 压焓图与 T-s 温熵图实时循环界面"></div>
+          <div class="cap">P-h 压焓图 · T-s 温熵图</div>
+        </div>
+        <div class="a" style="--d:.26s;display:flex;flex-direction:column;min-height:0">
+          <div class="imgbox dk" style="flex:1"><img src="assets/v_sf.jpg" alt="熵流动态曲线界面"></div>
+          <div class="cap">熵流动态曲线</div>
+        </div>
+        <div class="a" style="--d:.36s;display:flex;flex-direction:column;min-height:0">
+          <div class="imgbox dk" style="flex:1"><img src="assets/v_cop.jpg" alt="COP 制冷系数曲线界面"></div>
+          <div class="cap">COP 曲线 · 叠加卡诺上限虚线</div>
+        </div>
+      </div>
+      <div class="inter-chips a" style="--d:.48s">
+        <span class="chip">🖱️ 滚轮<b>跟手缩放</b></span>
+        <span class="chip">✋ 拖动<b>等速平移</b></span>
+        <span class="chip">🔍 悬停<b>最近邻查值</b></span>
+        <span class="chip">📊 一键导出 <b>OOXML 标准 .xlsx</b></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 实验步骤 -->
+  <section class="slide">
+    <div class="bg b-dark"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>05</span><span class="ln"></span><span class="en">实验步骤</span></div>
+      <h2 class="title a" style="--d:.06s">六步流程，<em>从定性到定量</em></h2>
+      <div class="tl">
+        <div class="tl-track">
+          <div class="tl-it a" style="--d:.14s"><div class="nd">1</div><h5>预习自查</h5><p>理解克劳修斯表述<br>编制数据记录表</p><div class="tm">课前</div></div>
+          <div class="tl-it a" style="--d:.22s"><div class="nd">2</div><h5>上电自检</h5><p>闭合漏电保护器<br>仪表无断码 · 温差 ≤2℃</p><div class="tm">≈2 min</div></div>
+          <div class="tl-it a" style="--d:.3s"><div class="nd">3</div><h5>开机观察</h5><p>冷凝器出热风 · 蒸发器出冷风<br>定性感知逆向传热</p><div class="tm">即时</div></div>
+          <div class="tl-it a" style="--d:.38s"><div class="nd">4</div><h5>稳定记录</h5><p>运行约 5 min 参数稳定<br>记录温度/压力/电压电流</p><div class="tm">≈5 min</div></div>
+          <div class="tl-it a" style="--d:.46s"><div class="nd">5</div><h5>定量计算</h5><p>熵变与 COP 计算<br>对照卡诺上限验证</p><div class="tm">课后</div></div>
+          <div class="tl-it a" style="--d:.54s"><div class="nd">6</div><h5>关机整理</h5><p>先关系统开关再断电<br>清理实验台</p><div class="tm">收尾</div></div>
+        </div>
+      </div>
+      <div class="foot-line a" style="--d:.64s">安全提示：触摸面温度 ≤ 50℃，切勿直手接触管路，防止烫伤/冻伤</div>
+    </div>
+  </section>
+
+  <!-- 15 数据验证 -->
+  <section class="slide">
+    <div class="bg b-dark"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>05</span><span class="ln"></span><span class="en">实验步骤 · 数据验证</span></div>
+      <h2 class="title a" style="--d:.06s">22 组工况实测，<em>误差足够小</em></h2>
+      <div class="res" style="margin-top:10px">
+        <div class="mets">
+          <div class="met a" style="--d:.16s"><span class="v">2.90<span style="font-size:15px">%</span></span><div class="k">冷凝器出口温度 · 相对误差</div></div>
+          <div class="met a" style="--d:.24s"><span class="v warm">−1.90<span style="font-size:15px">%</span></span><div class="k">蒸发器出口温度 · 相对误差</div></div>
+          <div class="met a" style="--d:.32s"><span class="v">22<span style="font-size:15px"> 组</span></span><div class="k">不同环境温度工况 · 23.3~30.3℃</div></div>
+        </div>
+        <div class="res-charts">
+          <div class="a" style="--d:.24s"><div class="imgbox"><img src="assets/c_pow.jpg" alt="压缩机输出功率随环境温度变化曲线"></div><div class="cap">环境温度↑ → 压缩机输出功率↑</div></div>
+          <div class="a" style="--d:.34s"><div class="imgbox"><img src="assets/c_sf.jpg" alt="系统熵流随工况变化曲线"></div><div class="cap">熵流随工况规律变化 · 定量可复现</div></div>
+          <div class="concl a" style="--d:.46s">相对误差与不确定度均较小，实验规律与克劳修斯理论完全契合 —— 验证了方案的科学性与装置的可靠性</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 创新性 -->
+  <section class="slide">
+    <div class="bg b-dark"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>06</span><span class="ln"></span><span class="en">创新性</span></div>
+      <h2 class="title a" style="--d:.06s">三大创新点，<em>一套可复制的方案</em></h2>
+      <div class="cmp-strip a" style="--d:.1s">
+        <div class="cmp-it"><span class="cmp-k">市售制冷实验台</span><span class="cmp-v bad">¥2 万+ · 仅测温 · 无曲线</span></div>
+        <div class="cmp-arrow">➤</div>
+        <div class="cmp-it"><span class="cmp-k">本平台</span><span class="cmp-v good">¥4,580 · 四图实时循迹 · 定量可复现</span></div>
+      </div>
+      <div class="inno" style="margin-top:10px">
+        <div class="card a" style="--d:.16s"><span class="cno">INNOVATION 01</span><div class="big">👁️ 可视化</div><p>实物 + 数据双通道：热风/冷风可触摸感知，P-h、T-s、熵流、COP 四图实时循迹，抽象定律看得见。</p></div>
+        <div class="card a" style="--d:.26s"><span class="cno">INNOVATION 02</span><div class="big">🧾 定量化</div><p>基于熵增原理与㶲分析，以状态参数计算严格验证克劳修斯表述，给出相对误差与不确定度。</p></div>
+        <div class="card a" style="--d:.36s"><span class="cno">INNOVATION 03</span><div class="big">🤖 控制智能化</div><p>仪表经 Modbus RTU 接入自主编程 PLC，全部数据直达触摸屏，采集-显示-导出全流程自动化。</p></div>
+      </div>
+      <div class="inno-strip a" style="--d:.5s">
+        <div class="pm"><span class="v">¥4,580</span><span class="k">整机成本 · 远低于市售设备</span></div>
+        <div class="pm"><span class="v">≤50℃</span><span class="k">可触摸表面 · 安全</span></div>
+        <div class="pm"><span class="v">1100×700</span><span class="k">移动台架 · 紧凑部署</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 总结展望 -->
+  <section class="slide">
+    <div class="bg b-dark"></div>
+    <div class="wrap">
+      <div class="kicker a"><span>07</span><span class="ln"></span><span class="en">总结与展望</span></div>
+      <h2 class="title a" style="--d:.06s">让第二定律，<em>可测 · 可视 · 可教</em></h2>
+      <div class="sum" style="margin-top:10px">
+        <div class="card a" style="--d:.18s">
+          <h4><span class="ic">✅</span>实验总结</h4>
+          <ul>
+            <li>真实制冷循环搭建逆向传热平台，直观具象化验证热力学第二定律。</li>
+            <li>基于 PLC 开发全流程定量可视化监测，多参数同步采集、实时生成热力曲线。</li>
+            <li>多组数据演算与现象观测规律与克劳修斯理论完全契合，设备安全可靠。</li>
+          </ul>
+        </div>
+        <div class="card future a" style="--d:.3s">
+          <h4><span class="ic">🚀</span>未来展望</h4>
+          <ul>
+            <li>升级传感与控制程序，进一步提升采集精度与动态图像输出稳定性。</li>
+            <li>依托可视化平台探究新型热力循环、能量转化效率提升与新式制冷工艺。</li>
+            <li>既服务高校热力学教学，也为热力系统科研与工程应用提供可借鉴方案。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="app-strip a" style="--d:.44s">
+        <div class="app-it"><span class="app-ic">🎓</span><span>高校热工教学</span></div>
+        <div class="app-it"><span class="app-ic">🔬</span><span>热力学科研</span></div>
+        <div class="app-it"><span class="app-ic">🏭</span><span>工程应用验证</span></div>
+        <div class="app-it"><span class="app-ic">🌐</span><span>远程实验教学</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 结束 -->
+  <section class="slide s-end">
+    <div class="bg b-hero"></div>
+    <div class="wrap">
+      <div class="end-k a" style="--d:.1s">THANKS FOR LISTENING</div>
+      <div class="end-t a" style="--d:.25s">感谢聆听</div>
+      <div class="end-s a" style="--d:.4s">热力学第二定律量化综合实验平台 · 恳请各位专家评委批评指正</div>
+    </div>
+  </section>
+
+  <div class="chrome-b">
+    <span>物理实验创新竞赛 · 热力学第二定律量化综合实验平台</span>
+    <span class="r" id="pgNo">01 / 18</span>
+  </div>
+  <div id="dots"></div>
+</div>
+
+<script>
+const SECTIONS=[
+  {no:'01',name:'研究背景',start:2},
+  {no:'02',name:'物理原理',start:4},
+  {no:'03',name:'设计方案',start:7},
+  {no:'04',name:'可视化系统',start:11},
+  {no:'05',name:'实验步骤',start:13},
+  {no:'06',name:'创新性',start:15},
+  {no:'07',name:'总结展望',start:16}
+];
+const slides=[...document.querySelectorAll('.slide')];
+const N=slides.length;
+const navbox=document.getElementById('navbox');
+SECTIONS.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='nav-it';b.innerHTML='<span class="n-idx">'+s.no+'</span>'+s.name;
+  b.onclick=()=>go(s.start);
+  navbox.appendChild(b);
+});
+const ind=document.createElement('div');ind.id='navind';navbox.appendChild(ind);
+const dotsBox=document.getElementById('dots');
+for(let i=0;i<N;i++){const d=document.createElement('div');d.className='dot';d.onclick=()=>go(i);dotsBox.appendChild(d);}
+const dots=[...dotsBox.children];
+const navIts=[...navbox.querySelectorAll('.nav-it')];
+
+function secOf(i){let r=-1;SECTIONS.forEach((s,k)=>{if(i>=s.start)r=k});return r;}
+function moveInd(){
+  const si=secOf(cur);
+  navIts.forEach((el,k)=>el.classList.toggle('on',k===si));
+  if(si>=0){
+    const el=navIts[si];
+    ind.style.left=el.offsetLeft+10+'px';
+    ind.style.width=el.offsetWidth-20+'px';
+  }else{ind.style.width='0';}
+}
+let cur=0;
+function go(i,skipHash){
+  i=Math.max(0,Math.min(N-1,i));
+  if(i===cur&&slides[i].classList.contains('active'))return;
+  slides[cur].classList.remove('active');
+  cur=i;
+  slides[cur].classList.add('active');
+  dots.forEach((d,k)=>d.classList.toggle('on',k===cur));
+  document.getElementById('pgNo').textContent=String(cur+1).padStart(2,'0')+' / '+N;
+  document.getElementById('pbar').style.width=((cur+1)/N*100)+'%';
+  const bare=(cur===0||cur===N-1);
+  document.getElementById('topnav').classList.toggle('hide',bare);
+  document.getElementById('brand').classList.toggle('hide',bare);
+  moveInd();
+  if(!skipHash)try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+}
+function fit(){
+  const s=Math.min(innerWidth/1280,innerHeight/720)*0.985;
+  document.getElementById('canvas').style.transform='translate(-50%,-50%) scale('+s+')';
+}
+addEventListener('resize',fit);
+addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();go(cur+1);}
+  else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();go(cur-1);}
+  else if(e.key==='Home')go(0);
+  else if(e.key==='End')go(N-1);
+});
+let wlock=false;
+addEventListener('wheel',e=>{
+  if(wlock)return;wlock=true;setTimeout(()=>wlock=false,650);
+  go(cur+(e.deltaY>0?1:-1));
+},{passive:true});
+let tx=0;
+addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>60)go(cur+(dx<0?1:-1));
+},{passive:true});
+document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',()=>go(+el.dataset.go)));
+fit();
+const h0=parseInt((location.hash||'').replace('#',''),10);
+if(h0>=1&&h0<=N)go(h0-1,true);else go(0,true);
+if(location.search.indexOf('snap')>=0)document.head.insertAdjacentHTML('beforeend','<style>*,*::before,*::after{transition:none!important;animation:none!important}</style>');
+</script>
+</body>
+</html>

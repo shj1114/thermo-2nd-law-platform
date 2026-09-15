@@ -1,0 +1,36 @@
+# 截图与临时文件
+review_shots/
+review_shots2/
+*.log
+
+# docx 解压素材
+docx_media/
+
+# 无关工程文件
+ccs_project/
+main.c
+hmi_uart.c
+hmi_uart.h
+*.ccxml
+*.cproject
+*.projectspec
+*.lds
+startup_*.c
+
+# 工具与脚本
+*.zip
+*.bat
+*.ps1
+
+# 根目录大图（生成用源图，assets 内已收录成品）
+/cyberpunk_*.jpg
+/sci_fi_*.jpg
+/bg_*.jpg
+/contact_sheet.jpg
+/zhishankangchu_qrcode.png
+
+# 编辑器与系统
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

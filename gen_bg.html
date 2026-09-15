@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>bg gen</title>
+<style>
+  body { margin:0; background:#111; }
+  img { display:block; width:32%; float:left; }
+  #status { color:#fff; font-family:sans-serif; padding:8px; clear:both; }
+</style>
+</head>
+<body>
+<div id="status">loading...</div>
+<img id="p1" alt="b1"><img id="p2" alt="b2"><img id="p3" alt="b3">
+<script>
+const base = 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=';
+const size = '&image_size=landscape_16_9';
+const prompts = {
+  p1: `纯背景图，超暗电影感科幻抽象背景，深海军蓝到纯黑渐变，四角有极微弱的蓝紫色星云光晕，稀疏的微小发光蓝色粒子与极淡的六边形网格纹理，极暗、极低细节，90%面积是干净的深色空间，无任何文字无任何主体，演示文稿背景，横向16:9`,
+  p2: `纯背景图，深黑宇宙空间中漂浮着若干条微弱的发光青色与紫红色热力学曲线和淡网格坐标系，像全息数据图，边缘有柔和泛光，稀疏光斑粒子，画面中央与底部大部分为干净深色空白，电影氛围，无任何文字，横向16:9`,
+  p3: `纯背景图，深黑电影感背景，左侧一束暖橙红色发光能量流与右侧一束冰蓝色发光能量流在画面中上部交汇缠绕，表现热量传递方向性，稀疏粒子，大量干净深色留白，无任何文字无任何设备，横向16:9`
+};
+let done = 0;
+for (const id in prompts) {
+  const img = document.getElementById(id);
+  img.src = base + encodeURIComponent(prompts[id]) + size;
+  img.onload = () => { done++; if (done === 3) document.getElementById('status').textContent = 'ALL LOADED'; };
+  img.onerror = () => { done++; document.getElementById('status').textContent += ' ERR:' + id; };
+}
+</script>
+</body>
+</html>
